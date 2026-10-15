@@ -1,0 +1,112 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: rustfmt
+        working-directory: src-tauri
+        run: cargo fmt --check
+
+      - name: clippy
+        working-directory: src-tauri
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: tests
+        working-directory: src-tauri
+        run: cargo test --lib --locked
+
+  build:
+    name: Build Purifier for Windows
+    needs: validate
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - run: npm ci
+
+      - name: Build installers and create draft release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: src-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: Purifier ${{ github.ref_name }}
+          releaseBody: |
+            ## Purifier for Windows
+
+            - **NSIS installer:** `*-setup.exe`, installs Purifier.
+            - **MSI installer:** `*.msi`, for managed deployment.
+            - **Portable:** `*-portable.exe`, runs without installing.
+
+            Purifier requires Windows 10 or 11 and administrator rights.
+          releaseDraft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generateReleaseNotes: true
+          args: --target x86_64-pc-windows-msvc
+
+      - name: Build portable executable
+        run: npm run tauri -- build --no-bundle --target x86_64-pc-windows-msvc
+
+      - name: Prepare portable executable
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          $name = "Purifier_${version}_x64-portable.exe"
+          $source = "src-tauri/target/x86_64-pc-windows-msvc/release/purifier-app.exe"
+          if (-not (Test-Path $source)) {
+            throw "Portable build not found at $source"
+          }
+          Copy-Item $source $name
+          Write-Host "Prepared $name"
+
+      - name: Upload portable executable to draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          gh release upload "${{ github.ref_name }}" "Purifier_${version}_x64-portable.exe" --clobber

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Windows application manifest for Purifier.
+
+  Two things matter here:
+
+  * `requestedExecutionLevel` is `requireAdministrator`. Cleaning
+    `C:\Windows\SoftwareDistribution` or `%ProgramData%` is impossible without
+    elevation, and the categories that need it are listed in the catalog with
+    `needs_admin: true`. Elevating once at launch is simpler than prompting the
+    user every time they tick a system checkbox.
+  * The Common-Controls dependency is Tauri's default manifest, preserved here
+    so the WebView2 dialogs and native controls keep rendering correctly.
+
+  This file replaces Tauri's built-in manifest; anything dropped from it is
+  lost, so keep it in sync when upgrading tauri-build.
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity
+    type="win32"
+    name="com.admin.purifier"
+    version="1.0.0.0"
+    processorArchitecture="*"
+  />
+
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity
+        type="win32"
+        name="Microsoft.Windows.Common-Controls"
+        version="6.0.0.0"
+        processorArchitecture="*"
+        publicKeyToken="6595b64144ccf1df"
+        language="*"
+      />
+    </dependentAssembly>
+  </dependency>
+
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel
+          xmlns="urn:schemas-microsoft-com:asm.v3"
+          level="requireAdministrator"
+          uiAccess="false"
+        />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <!-- Per-monitor scaling, otherwise the UI is blurry on a 4K display. -->
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">permonitorv2,permonitor</dpiAwareness>
+    </windowsSettings>
+  </application>
+</assembly>

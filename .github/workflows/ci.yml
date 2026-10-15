@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'assets/**'
+
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'assets/**'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+  rust:
+    name: Rust
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # `generate_context!` embeds `frontendDist` at compile time and refuses to
+      # build when the directory is absent, so lint and tests need a stand-in.
+      # `web` is what actually verifies the real frontend builds.
+      - name: Stand in for the frontend build tauri embeds at compile time
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force dist | Out-Null; '<!doctype html>' | Set-Content dist/index.html
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: rustfmt
+        working-directory: src-tauri
+        run: cargo fmt --check
+
+      - name: clippy
+        working-directory: src-tauri
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      # Use `--lib` to run library tests only. The binary target requires
+      # elevated privileges on Windows, which prevents the test runner from
+      # launching it in the CI environment. All current tests are in the library.
+      - name: tests
+        working-directory: src-tauri
+        run: cargo test --lib --locked
