@@ -33,7 +33,7 @@
     <a href="https://github.com/GIFUS/purifier-app/issues">Report a bug</a>
   </p>
 
-  <img src="assets/preview.png" alt="Purifier application preview" width="900">
+  <!-- <img src="assets/preview.png" alt="Purifier application preview" width="900">-->
 </div>
 
 ## Features
