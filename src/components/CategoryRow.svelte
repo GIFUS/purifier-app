@@ -20,7 +20,6 @@
   const measured = $derived(state.targets.has(category.id));
   const expanded = $derived(state.expanded.has(category.id));
   const size = $derived(categorySize(category.id));
-  const anyUsable = $derived(targets.some((t) => t.exists && !t.reparse));
   const isSelected = $derived(state.selected.has(category.id));
 
   const anyStatus = $derived(targets.some((target) => describe(target).text !== ""));
@@ -32,13 +31,6 @@
 
   const sizeText = $derived(
     !measured ? "…" : cleanable ? formatBytes(size) : "empty",
-  );
-  const checkboxTitle = $derived(
-    cleanable
-      ? "Select this category"
-      : anyUsable
-        ? "Already empty"
-        : "Nothing to clean here on this machine",
   );
 
   function onHeadingClick(): void {
@@ -105,7 +97,6 @@
         class="peer size-[18px] cursor-pointer appearance-none rounded-[5px] border border-border-strong bg-bg-raised transition-[border-color,background] duration-150 hover:not-disabled:border-accent checked:border-accent checked:bg-accent disabled:cursor-not-allowed"
         disabled={!cleanable}
         checked={isSelected}
-        title={checkboxTitle}
         onclick={(event) => event.stopPropagation()}
         onchange={(event) => {
           const input = event.currentTarget as HTMLInputElement;

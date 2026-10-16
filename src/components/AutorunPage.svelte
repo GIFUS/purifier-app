@@ -9,18 +9,18 @@
     setAutorunEnabled,
     setAutorunTaskEnabled,
   } from "../api";
-  import { formatNumber } from "../format";
-  import { PAGE_LABELS } from "../nav";
   import {
     autorunCount,
-    autorunKey,
     autorunRows,
     autorunScopes,
     missingRows,
-    state,
-    taskKey,
-  } from "../state.svelte";
-  import type { AutorunEntry, AutorunTask } from "../types";
+    rowKey,
+    type AutorunRow,
+  } from "../autorun.svelte";
+  import { errorMessage } from "../errors";
+  import { formatNumber } from "../format";
+  import { PAGE_LABELS } from "../nav";
+  import { state } from "../state.svelte";
 
   const SCOPE_LABELS: Record<string, string> = {
     user: "Current user",
@@ -30,14 +30,6 @@
   const scopes = $derived(autorunScopes());
   const missing = $derived(missingRows());
   const counts = $derived(autorunCount());
-
-  function isTask(row: AutorunEntry | AutorunTask): row is AutorunTask {
-    return !("source" in row);
-  }
-
-  function describe(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
-  }
 
   function scopeLabel(scope: string): string {
     return SCOPE_LABELS[scope] ?? scope;
@@ -52,7 +44,7 @@
       state.autorunTasks = scheduled;
       state.autorunLoaded = true;
     } catch (error) {
-      state.autorunError = describe(error);
+      state.autorunError = errorMessage(error);
     } finally {
       state.autorunLoading = false;
     }
@@ -64,32 +56,25 @@
       await action();
       await load();
     } catch (error) {
-      state.autorunError = describe(error);
+      state.autorunError = errorMessage(error);
     }
   }
 
-  function toggleEntry(entry: AutorunEntry, enabled: boolean): Promise<void> {
-    const key = autorunKey(entry);
+  function toggleRow(row: AutorunRow, enabled: boolean): Promise<void> {
+    const key = rowKey(row);
     if (state.autorunBusy.has(key)) return Promise.resolve();
     state.autorunBusy.add(key);
-    return run(() =>
-      setAutorunEnabled(entry.source, entry.scope, entry.path, entry.name, enabled),
-    ).finally(() => state.autorunBusy.delete(key));
-  }
-
-  function toggleTask(task: AutorunTask, enabled: boolean): Promise<void> {
-    const key = taskKey(task);
-    if (state.autorunBusy.has(key)) return Promise.resolve();
-    state.autorunBusy.add(key);
-    return run(() => setAutorunTaskEnabled(task.path, task.name, enabled)).finally(() =>
-      state.autorunBusy.delete(key),
-    );
+    const action = "source" in row
+      ? () => setAutorunEnabled(row.source, row.scope, row.path, row.name, enabled)
+      : () => setAutorunTaskEnabled(row.path, row.name, enabled);
+    return run(action).finally(() => state.autorunBusy.delete(key));
   }
 
   onMount(() => {
     void load();
   });
 </script>
+
 
 <section class="grid h-full min-h-0 grid-rows-[auto_1fr_auto]">
   <header class="border-b border-border px-4 pb-3 pt-[18px]">
@@ -99,9 +84,8 @@
     </p>
   </header>
 
-  {#snippet entryRow(row: AutorunEntry | AutorunTask)}
-  {@const task = isTask(row)}
-  {@const busyKey = task ? taskKey(row as AutorunTask) : autorunKey(row as AutorunEntry)}
+  {#snippet entryRow(row: AutorunRow)}
+  {@const busyKey = rowKey(row)}
   {@const checked = row.enabled}
   {@const busy = state.autorunBusy.has(busyKey)}
   <li class="border-y border-transparent" class:opacity-55={!checked}>
@@ -115,16 +99,14 @@
       aria-label={row.name}
       onclick={() => {
         if (busy) return;
-        if (task) void toggleTask(row as AutorunTask, !checked);
-        else void toggleEntry(row as AutorunEntry, !checked);
+        void toggleRow(row, !checked);
       }}
       onkeydown={(event) => {
         if (event.target !== event.currentTarget) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           if (busy) return;
-          if (task) void toggleTask(row as AutorunTask, !checked);
-          else void toggleEntry(row as AutorunEntry, !checked);
+          void toggleRow(row, !checked);
         }
       }}
     >
@@ -134,14 +116,11 @@
           class="peer size-[18px] cursor-pointer appearance-none rounded-[5px] border border-border-strong bg-bg-raised transition-[border-color,background] duration-150 hover:not-disabled:border-accent checked:border-accent checked:bg-accent disabled:cursor-not-allowed"
           checked={checked}
           disabled={busy}
-          title={checked ? "Do not start this program" : "Start this program"}
           aria-label={row.name}
           onclick={(event) => event.stopPropagation()}
           onchange={(event) => {
             const input = event.currentTarget as HTMLInputElement;
-            const next = input.checked;
-            if (task) void toggleTask(row as AutorunTask, next);
-            else void toggleEntry(row as AutorunEntry, next);
+            void toggleRow(row, input.checked);
           }}
         />
         <Check
@@ -171,7 +150,7 @@
   </li>
 {/snippet}
 
-{#snippet groupRows(rows: (AutorunEntry | AutorunTask)[])}
+{#snippet groupRows(rows: AutorunRow[])}
   <ul class="m-0 list-none p-0">
     {#each rows as row (`${row.name} ${row.command}`)}
       {@render entryRow(row)}

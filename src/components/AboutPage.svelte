@@ -18,7 +18,7 @@
   const identifier = $derived(info?.identifier ?? "…");
 </script>
 
-<section class="grid h-full min-h-0 grid-rows-[auto_auto_1fr] overflow-hidden px-4 pb-4 pt-[18px]">
+<section class="grid h-full min-h-0 grid-rows-[auto_auto_auto_1fr] overflow-hidden px-4 pb-4 pt-[18px]">
   <header>
     <h1 class="m-0 text-title font-semibold tracking-[0.2px]">{PAGE_LABELS.about}</h1>
     <p class="mt-1 text-caption text-text-muted">
@@ -43,7 +43,7 @@
     </div>
   </dl>
 
-  <div class="mt-auto flex items-center gap-2.5 pt-3.5">
+  <div class="mt-3.5 flex items-center gap-1.25">
     <span class="text-label text-text-muted">Source code</span>
     <button
       type="button"

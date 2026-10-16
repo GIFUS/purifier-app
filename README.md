@@ -94,8 +94,13 @@ The frontend communicates with Rust through Tauri's command interface and event 
 - `scan_categories` — scan selected categories for cleanup candidates.
 - `clean_categories` — clean selected categories.
 - `open_in_explorer` — open a target in Windows File Explorer.
+- `open_repository` — open the project's repository in the default browser.
 - `app_info` — retrieve the running build's version and identifier.
 - `app_ready` — signal that the frontend is ready.
+- `list_autorun` — list the Run keys and Startup-folder entries.
+- `list_autorun_tasks` — list the sign-in triggered scheduled tasks.
+- `set_autorun_enabled` — enable or disable one Run or Startup-folder entry.
+- `set_autorun_task_enabled` — enable or disable one scheduled task.
 
 This separation keeps filesystem operations in Rust while allowing the UI to evolve independently.
 

@@ -6,9 +6,7 @@
 
   * `requestedExecutionLevel` is `requireAdministrator`. Cleaning
     `C:\Windows\SoftwareDistribution` or `%ProgramData%` is impossible without
-    elevation, and the categories that need it are listed in the catalog with
-    `needs_admin: true`. Elevating once at launch is simpler than prompting the
-    user every time they tick a system checkbox.
+    elevation, and the app asks for it once at launch rather than per action.
   * The Common-Controls dependency is Tauri's default manifest, preserved here
     so the WebView2 dialogs and native controls keep rendering correctly.
 
