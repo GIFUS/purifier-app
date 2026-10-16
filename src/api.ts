@@ -4,6 +4,8 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import type {
   AppError,
   AppInfo,
+  AutorunEntry,
+  AutorunTask,
   CategoryDef,
   CleanReport,
   CleanupMode,
@@ -46,6 +48,21 @@ export const openRepository = () => call<void>("open_repository");
 export const appReady = () => call<void>("app_ready");
 
 export const appInfo = () => call<AppInfo>("app_info");
+
+export const listAutorun = () => call<AutorunEntry[]>("list_autorun");
+
+export const listAutorunTasks = () => call<AutorunTask[]>("list_autorun_tasks");
+
+export const setAutorunTaskEnabled = (path: string, name: string, enabled: boolean) =>
+  call<void>("set_autorun_task_enabled", { path, name, enabled });
+
+export const setAutorunEnabled = (
+  source: string,
+  scope: string,
+  path: string,
+  name: string,
+  enabled: boolean,
+) => call<void>("set_autorun_enabled", { source, scope, path, name, enabled });
 
 export const onTarget = (handler: (payload: ScanProgress) => void): Promise<UnlistenFn> =>
   listen<ScanProgress>(EVENTS.target, (event) => handler(event.payload));

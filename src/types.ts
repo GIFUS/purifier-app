@@ -76,3 +76,22 @@ export interface AppInfo {
   version: string;
   identifier: string;
 }
+
+export interface AutorunEntry {
+  source: string;
+  scope: string;
+  path: string;
+  name: string;
+  command: string;
+  enabled: boolean;
+  exists: boolean;
+}
+
+export interface AutorunTask {
+  name: string;
+  path: string;
+  command: string;
+  enabled: boolean;
+  exists: boolean;
+  scope: string;
+}

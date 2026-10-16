@@ -20,6 +20,8 @@ thiserror = "2"
 walkdir = "2.5"
 rayon = "1.12"
 glob = "0.3"
+winreg = "0.55"
+quick-xml = "0.42"
 
 [dev-dependencies]
 tempfile = "3"

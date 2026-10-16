@@ -15,6 +15,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::app::app_info,
+            commands::autorun::list_autorun,
+            commands::autorun::list_autorun_tasks,
+            commands::autorun::set_autorun_enabled,
+            commands::autorun::set_autorun_task_enabled,
             commands::catalog::list_categories,
             commands::catalog::list_groups,
             commands::scan::scan_categories,

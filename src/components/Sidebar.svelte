@@ -28,7 +28,7 @@
 
   function itemClass(): string {
     return (
-      "group relative flex h-[38px] w-full items-center gap-2.5 rounded-app border-0 bg-transparent pl-3 text-left text-row text-text-muted " +
+      "group relative flex h-[38px] w-full cursor-pointer items-center gap-2.5 rounded-app border-0 bg-transparent pl-3 text-left text-row text-text-muted " +
       "transition-[background-color,color,padding] duration-240 ease-rail " +
       "hover:not-data-active:bg-bg-hover hover:not-data-active:text-text " +
       "data-active:bg-bg-hover data-active:text-text data-active:font-semibold " +
@@ -103,7 +103,7 @@
     <div class="mt-[3px]">
       <button
         type="button"
-        class="group relative flex h-8 w-full items-center gap-2.5 rounded-app border-0 bg-transparent pl-3 text-left text-caption text-text-faint transition-[background-color,color,padding] duration-240 ease-rail hover:bg-bg-hover {itemLayout}"
+        class="group relative flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-app border-0 bg-transparent pl-3 text-left text-caption text-text-faint transition-[background-color,color,padding] duration-240 ease-rail hover:bg-bg-hover {itemLayout}"
         data-tip={toggleLabel}
         aria-label={toggleLabel}
         aria-expanded={expanded}

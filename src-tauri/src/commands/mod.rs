@@ -1,4 +1,5 @@
 pub mod app;
+pub mod autorun;
 pub mod catalog;
 pub mod clean;
 pub mod reveal;

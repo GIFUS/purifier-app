@@ -11,6 +11,7 @@
     scanCategories,
   } from "./api";
   import AboutPage from "./components/AboutPage.svelte";
+  import AutorunPage from "./components/AutorunPage.svelte";
   import CategoryRow from "./components/CategoryRow.svelte";
   import { confirmDialog } from "./components/confirm-dialog";
   import Sidebar from "./components/Sidebar.svelte";
@@ -198,7 +199,7 @@
 <div class="flex h-full overflow-hidden">
   <Sidebar />
   <div
-    class="grid h-full min-w-0 flex-1 grid-rows-[auto_1fr_auto] overflow-hidden rounded-tl-panel bg-bg"
+    class="grid h-full min-w-0 flex-1 grid-rows-1 overflow-hidden rounded-tl-panel bg-bg"
   >
     {#if state.page === "cleanup"}
       <section class="grid h-full min-h-0 grid-rows-[auto_1fr_auto]">
@@ -251,6 +252,8 @@
           onClear={() => clearSelection()}
         />
       </section>
+    {:else if state.page === "autostart"}
+      <AutorunPage />
     {:else}
       <AboutPage />
     {/if}

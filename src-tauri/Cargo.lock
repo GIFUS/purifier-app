@@ -2683,6 +2683,7 @@ name = "purifier-app"
 version = "1.0.0"
 dependencies = [
  "glob",
+ "quick-xml",
  "rayon",
  "serde",
  "tauri",
@@ -2691,6 +2692,7 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.21",
  "walkdir",
+ "winreg",
 ]
 
 [[package]]
