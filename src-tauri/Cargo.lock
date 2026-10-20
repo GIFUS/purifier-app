@@ -2680,7 +2680,7 @@ dependencies = [
 
 [[package]]
 name = "purifier-app"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "glob",
  "quick-xml",
